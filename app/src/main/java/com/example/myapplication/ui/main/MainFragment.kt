@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.offline.Download
+import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,7 +33,7 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         // TODO: Use the ViewModel
     }
 
@@ -46,6 +48,23 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
+        JSMDownloadManager.getDownloadManager(requireContext())
+            .addListener(object : DownloadManager.Listener {
+                override fun onDownloadChanged(
+                    downloadManager: DownloadManager,
+                    download: Download,
+                    finalException: java.lang.Exception?
+                ) {
+                    Log.d(TAG, "onDownloadChanged: ${download.state}")
+                    Log.d(TAG, "onDownloadChanged:  download.request.id : ${download.request.id}")
+                    Log.d(TAG, "onDownloadChanged: Uri  ${download.request.uri}")
+
+                    viewModel.updateItem(download)
+                    val itemPosition = download.request.id.toInt() - 1
+                    binding.videoUrl.adapter?.notifyItemChanged(itemPosition)
+                    super.onDownloadChanged(downloadManager, download, finalException)
+                }
+            })
     }
 
     private fun initRecyclerView() {
@@ -55,15 +74,20 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
         binding.videoUrl.adapter = videoAdapter
     }
 
-    override fun onItemClick(videoUrl: String) {
+    override fun onItemClick(id: Int) {
         Log.d("PRS", "Main fragment")
         if (activity is MainActivity) {
-            (activity as MainActivity).replaceFragment(videoUrl)
+            val download =
+                JSMDownloadManager.getDownloadManager(requireContext()).downloadIndex.getDownload(id.toString())
+            Log.d(TAG, "onItemClick: ${download?.state}")
+            val url = viewModel.getUrlForID(id)
+            (activity as MainActivity).replaceFragment(url, download?.state ?: 0)
         }
+
     }
 
     override fun onDownloadClick(id: Int) {
-        val url = viewModel.urlList[id].url
+        val url = viewModel.getUrlForID(id)
         val downloadRequest = DownloadRequest.Builder(id.toString(), Uri.parse(url)).build()
 //        downloadRequest.toMediaItem()
         DownloadService.sendAddDownload(

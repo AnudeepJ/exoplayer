@@ -3,14 +3,18 @@ package com.example.myapplication.ui.main
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
+import androidx.media3.exoplayer.offline.Download.STATE_DOWNLOADING
+import androidx.media3.exoplayer.offline.Download.STATE_QUEUED
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.databinding.ItemVideoBinding
 
-class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>) :
+@UnstableApi class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>) :
     RecyclerView.Adapter<VideoUrlAdapter.VideoListViewHolder>() {
 
     interface ItemClick {
-        fun onItemClick(videoUrl: String)
+        fun onItemClick(id: Int)
         fun onDownloadClick(id: Int)
     }
 
@@ -28,7 +32,7 @@ class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>) :
 
     override fun onBindViewHolder(holder: VideoListViewHolder, position: Int) {
         holder.view.video.text = videoUrlList[position].url
-        holder.onBind(videoUrlList[position].url)
+        holder.onBind(videoUrlList[position])
     }
 
     override fun getItemCount(): Int {
@@ -36,15 +40,23 @@ class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>) :
     }
 
 
+    @UnstableApi
     class VideoListViewHolder(val view: ItemVideoBinding, val itemClickListner: ItemClick) :
         RecyclerView.ViewHolder(view.root) {
-        fun onBind(videoUrl: String) {
+        fun onBind(item: MediaItemDto) {
             view.video.setOnClickListener {
-                itemClickListner.onItemClick(videoUrl)
+                itemClickListner.onItemClick(item.id)
             }
             view.downloadButton.setOnClickListener {
-                itemClickListner.onDownloadClick(bindingAdapterPosition)
+                itemClickListner.onDownloadClick(item.id)
             }
+            val downloadState = when (item.state) {
+                STATE_COMPLETED -> "STATE_COMPLETED"
+                STATE_DOWNLOADING -> "STATE_DOWNLOADING"
+                STATE_QUEUED -> "STATE_QUEUED"
+                else -> ""
+            }
+            view.state.text = downloadState
             Log.d("PRS", "on click")
         }
     }

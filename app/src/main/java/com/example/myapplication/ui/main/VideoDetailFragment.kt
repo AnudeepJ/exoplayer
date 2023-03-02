@@ -28,6 +28,7 @@ import java.io.File
 @UnstableApi
 class VideoDetailFragment : Fragment() {
     var url = ""
+    private var state: Int = 0
     var permission = arrayOf("android.permission.READ_EXTERNAL_STORAGE")
     private var player: ExoPlayer? = null
 
@@ -59,6 +60,7 @@ class VideoDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         url = arguments?.getString("URL", "") ?: ""
+        state = arguments?.getInt(BundleConstants.VIDEO_DOWNLOAD) ?: 0
         Log.d("PRS", "url " + url)
         initializePlayerFromURI2()
     }
@@ -88,23 +90,26 @@ class VideoDetailFragment : Fragment() {
     }
 
     fun buildCacheDataSourceFactory(): DataSource.Factory {
-        val cache = getDownloadCache()
-        val cacheSink = CacheDataSink.Factory()
-            .setCache(cache)
+        val cache = MediaCache.getCache(requireContext())
         val upstreamFactory =
             DefaultDataSource.Factory(requireContext(), DefaultHttpDataSource.Factory())
-        return CacheDataSource.Factory()
-            .setCache(cache)
-            .setCacheWriteDataSinkFactory(cacheSink)
-            .setCacheReadDataSourceFactory(FileDataSource.Factory())
-            .setUpstreamDataSourceFactory(upstreamFactory)
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+        return if (state == 3) {
+            CacheDataSource.Factory()
+                .setCache(cache!!)
+                .setCacheWriteDataSinkFactory(null)
+                .setUpstreamDataSourceFactory(upstreamFactory)
+        } else {
+            val cacheSink = CacheDataSink.Factory()
+                .setCache(cache!!)
+            CacheDataSource.Factory()
+                .setCache(cache)
+                .setCacheWriteDataSinkFactory(cacheSink)
+                .setCacheReadDataSourceFactory(FileDataSource.Factory())
+                .setUpstreamDataSourceFactory(upstreamFactory)
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+        }
     }
 
-    @Synchronized
-    private fun getDownloadCache(): Cache {
-        return MediaCache.getCache(requireContext())!!
-    }
 
     private fun releasePlayer() {
         player?.let { exoPlayer ->
@@ -114,7 +119,7 @@ class VideoDetailFragment : Fragment() {
             exoPlayer.release()
         }
         player = null
-        getDownloadCache().release()
+//        MediaCache.getCache(requireContext())?.release()
     }
 
     override fun onDestroy() {
