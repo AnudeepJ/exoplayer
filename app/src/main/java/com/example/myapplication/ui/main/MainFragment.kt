@@ -80,6 +80,7 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
             val download =
                 JSMDownloadManager.getDownloadManager(requireContext()).downloadIndex.getDownload(id.toString())
             Log.d(TAG, "onItemClick: ${download?.state}")
+
             val url = viewModel.getUrlForID(id)
             (activity as MainActivity).replaceFragment(url, download?.state ?: 0)
         }
