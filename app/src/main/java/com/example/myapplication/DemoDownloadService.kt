@@ -5,15 +5,12 @@ import android.R
 import android.app.Notification
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.media3.common.util.NotificationUtil
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.Cache
-import androidx.media3.datasource.cache.NoOpCacheEvictor
-import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
@@ -21,6 +18,8 @@ import androidx.media3.exoplayer.offline.DownloadService
 import androidx.media3.exoplayer.scheduler.PlatformScheduler
 import androidx.media3.exoplayer.scheduler.Requirements.RequirementFlags
 import androidx.media3.exoplayer.scheduler.Scheduler
+import com.example.myapplication.ui.main.MediaCache
+import com.example.myapplication.ui.main.TAG
 import java.io.File
 import java.util.concurrent.Executor
 
@@ -43,11 +42,22 @@ class DemoDownloadService : DownloadService(
         val downloadManager: DownloadManager = getdownloadManager()
 //        val downloadNotificationHelper: DownloadNotificationHelper =
 //            getDownloadNotificationHelper(context = this)!!
-//        downloadManager.addListener(
-//            TerminalStateNotificationHelper(
-//                this, downloadNotificationHelper, FOREGROUND_NOTIFICATION_ID + 1
-//            )
-//        )
+        downloadManager?.addListener(
+            object : DownloadManager.Listener {
+                override fun onDownloadChanged(
+                    downloadManager: DownloadManager,
+                    download: Download,
+                    finalException: java.lang.Exception?
+                ) {
+                    Log.d(TAG, "onDownloadChanged: ${download.state}")
+                    Log.d(TAG, "onDownloadChanged:  download.request.id : ${download.request.id}")
+                    Log.d(TAG, "onDownloadChanged: Uri  ${download.request.uri}")
+
+
+                    super.onDownloadChanged(downloadManager, download, finalException)
+                }
+            }
+        )
         return downloadManager
     }
 
@@ -70,7 +80,6 @@ class DemoDownloadService : DownloadService(
     }
 
 
-
     /**
      * Creates and displays notifications for downloads when they complete or fail.
      *
@@ -87,14 +96,14 @@ class DemoDownloadService : DownloadService(
         private var nextNotificationId: Int
 
 
-
         override fun onDownloadChanged(
             downloadManager: DownloadManager,
             download: Download,
             finalException: Exception?
         ) {
+            Log.d(TAG, "onDownloadChanged: ${download.state}")
             if (download.state == Download.STATE_COMPLETED) {
-                Log.d("PRS","Download complete")
+                Log.d("PRS", "Download complete")
             }
             val notification: Notification
             notification = if (download.state == Download.STATE_COMPLETED) {
@@ -138,21 +147,19 @@ class DemoDownloadService : DownloadService(
             getExternalFilesDir(null),
             "files"
         )
-        val downloadCache = SimpleCache(
-            downloadContentDirectory,
-            NoOpCacheEvictor(),
-            databaseprovider
-        ).also { downloadCache = it }
 
-        val downloadManager = DownloadManager(
-            applicationContext,
-            databaseprovider,
-            downloadCache,
-            DefaultHttpDataSource.Factory(),
-            downloadExecutor
-        )
 
-        return downloadManager
+        val downloadManager = MediaCache.getCache(applicationContext)?.let {
+            DownloadManager(
+                applicationContext,
+                databaseprovider,
+                it,
+                DefaultHttpDataSource.Factory(),
+                downloadExecutor
+            )
+        }
+
+        return downloadManager!!
     }
 
     @Synchronized

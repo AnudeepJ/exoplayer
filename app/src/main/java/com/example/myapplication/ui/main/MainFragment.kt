@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.main
 
+import android.net.Uri
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
@@ -7,11 +8,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.offline.DownloadRequest
+import androidx.media3.exoplayer.offline.DownloadService
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.DemoDownloadService
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentMainBinding
 
+const val TAG = "Exoplayer"
+
+@UnstableApi
 class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
 
     companion object {
@@ -48,10 +56,21 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
     }
 
     override fun onItemClick(videoUrl: String) {
-        Log.d("PRS","Main fragment")
-        if(activity is MainActivity) {
+        Log.d("PRS", "Main fragment")
+        if (activity is MainActivity) {
             (activity as MainActivity).replaceFragment(videoUrl)
         }
+    }
+
+    override fun onDownloadClick(id: Int) {
+        val url = viewModel.urlList[id].url
+        val downloadRequest = DownloadRequest.Builder(id.toString(), Uri.parse(url)).build()
+//        downloadRequest.toMediaItem()
+        DownloadService.sendAddDownload(
+            requireContext(),
+            DemoDownloadService::class.java, downloadRequest, false
+        )
+
     }
 
 }

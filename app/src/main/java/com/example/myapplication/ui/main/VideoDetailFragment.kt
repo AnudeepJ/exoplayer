@@ -22,7 +22,6 @@ import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.databinding.VideoDetailBinding
 import java.io.File
 
@@ -37,9 +36,7 @@ class VideoDetailFragment : Fragment() {
     private var playbackPosition = 0L
     lateinit var simpleCache: SimpleCache
 
-    private val DOWNLOAD_CONTENT_DIRECTORY = "downloads"
     var downloadRequest: DownloadRequest? = null
-    var downloadcache: Cache? = null
     var isFromOffline = false
     lateinit var binding: VideoDetailBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +73,8 @@ class VideoDetailFragment : Fragment() {
                 binding.videoDetail.player = exoPlayer
                 val mediaItem = MediaItem.fromUri(url)
                 //val mediaItem = downloadRequest?.let { MediaItem.fromUri(it.uri) }
-                val mediaSource = ProgressiveMediaSource.Factory(buildCacheDataSourceFactory()).createMediaSource(mediaItem)
+                val mediaSource = ProgressiveMediaSource.Factory(buildCacheDataSourceFactory())
+                    .createMediaSource(mediaItem)
                 // val mediaSource = SingleSampleMediaSource.Factory(buildCacheDataSourceFactory()).createMediaSource(mediaItem)
                 // uncomment below line for normal url video
                 //exoPlayer.setMediaItem(mediaItem)
@@ -88,30 +86,24 @@ class VideoDetailFragment : Fragment() {
             }
 
     }
+
     fun buildCacheDataSourceFactory(): DataSource.Factory {
         val cache = getDownloadCache()
         val cacheSink = CacheDataSink.Factory()
             .setCache(cache)
-        val upstreamFactory = DefaultDataSource.Factory(requireContext(), DefaultHttpDataSource.Factory())
-         return   CacheDataSource.Factory()
-                .setCache(cache)
-                .setCacheWriteDataSinkFactory(cacheSink)
-                .setCacheReadDataSourceFactory(FileDataSource.Factory())
-                .setUpstreamDataSourceFactory(upstreamFactory)
-                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+        val upstreamFactory =
+            DefaultDataSource.Factory(requireContext(), DefaultHttpDataSource.Factory())
+        return CacheDataSource.Factory()
+            .setCache(cache)
+            .setCacheWriteDataSinkFactory(cacheSink)
+            .setCacheReadDataSourceFactory(FileDataSource.Factory())
+            .setUpstreamDataSourceFactory(upstreamFactory)
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
     }
 
     @Synchronized
     private fun getDownloadCache(): Cache {
-        if (downloadcache == null) {
-            val downloadContentDirectory = File(
-               requireContext().getExternalFilesDir(null),
-                DOWNLOAD_CONTENT_DIRECTORY
-            )
-            // val cacheEvictor = LeastRecentlyUsedCacheEvictor(10 * 1024 * 1024)
-            downloadcache = SimpleCache(downloadContentDirectory, /*cacheEvictor*/ NoOpCacheEvictor(),  StandaloneDatabaseProvider(requireContext()))
-        }
-        return downloadcache!!
+        return MediaCache.getCache(requireContext())!!
     }
 
     private fun releasePlayer() {
@@ -122,11 +114,11 @@ class VideoDetailFragment : Fragment() {
             exoPlayer.release()
         }
         player = null
+        getDownloadCache().release()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
         releasePlayer()
     }
 
