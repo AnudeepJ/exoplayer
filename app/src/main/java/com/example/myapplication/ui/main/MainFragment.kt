@@ -1,13 +1,19 @@
 package com.example.myapplication.ui.main
 
+import android.graphics.Color
 import android.net.Uri
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.appcompat.widget.PopupMenu
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
@@ -18,6 +24,7 @@ import com.example.myapplication.DemoDownloadService
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentMainBinding
+import com.example.myapplication.databinding.ItemVideoBinding
 
 const val TAG = "Exoplayer"
 
@@ -67,9 +74,11 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
             })
     }
 
+
+
     private fun initRecyclerView() {
         binding.videoUrl.layoutManager = LinearLayoutManager(requireContext())
-        val videoAdapter = VideoUrlAdapter(viewModel.urlList)
+        val videoAdapter = VideoUrlAdapter(viewModel.urlList, context)
         videoAdapter.setListner(this)
         binding.videoUrl.adapter = videoAdapter
     }
@@ -80,7 +89,6 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
             val download =
                 JSMDownloadManager.getDownloadManager(requireContext()).downloadIndex.getDownload(id.toString())
             Log.d(TAG, "onItemClick: ${download?.state}")
-
             val url = viewModel.getUrlForID(id)
             (activity as MainActivity).replaceFragment(url, download?.state ?: 0)
         }
@@ -97,5 +105,23 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
         )
 
     }
+
+    override fun removeDownload(id: Int) {
+        JSMDownloadManager.getDownloadManager(requireContext()).removeDownload(id.toString())
+        binding.videoUrl.adapter?.notifyItemChanged(id - 1)
+    }
+
+    override fun onMenuClick(view: View, position: Int, id: Int) {
+        val popup = PopupMenu(view.context,view)
+        popup.inflate(R.menu.menu)
+        popup.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.remove_from_device -> removeDownload(id)
+            }
+            true
+        }
+        popup.show()
+    }
+
 
 }
