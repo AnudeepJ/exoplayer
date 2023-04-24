@@ -8,6 +8,7 @@ import androidx.media3.exoplayer.offline.Download
 @UnstableApi
 class MainViewModel : ViewModel() {
     var urlList = DataGenerator.createList()
+    var offlineList = DataGenerator.createOfflineList()
 
 
     fun getDownloadStatus(id: String, context: Context): Int {
@@ -18,6 +19,10 @@ class MainViewModel : ViewModel() {
 
     fun getUrlForID(id: Int): String {
         return urlList.filter { it.id == id }[0].url
+    }
+
+    fun getOfflineUrlForID(id: Int): String {
+        return offlineList.filter { it.id == id }[0].url
     }
 
     fun updateItem(download: Download) {

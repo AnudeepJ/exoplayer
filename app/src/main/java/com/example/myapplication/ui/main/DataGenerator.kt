@@ -84,4 +84,41 @@ object DataGenerator {
             )
         )
     }
+
+
+    fun createOfflineList(): List<MediaItemDto> = buildList {
+        add(
+            MediaItemDto(
+                1,
+                "android.resource://com.example.myapplication/raw/sample1",
+                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+                title = "Big Buck Bunny"
+            )
+        )
+        add(
+            MediaItemDto(
+                2,
+                "android.resource://com.example.myapplication/raw/sample1",
+                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
+                title = "Elephant Dream"
+            )
+        )
+        add(
+            MediaItemDto(
+                3,
+                "android.resource://com.example.myapplication/raw/sample1",
+                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
+                title = "For Bigger Blazes"
+            )
+        )
+        add(
+            MediaItemDto(
+                4,
+                "android.resource://com.example.myapplication/raw/sample1",
+                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg",
+                title = "Sintel"
+            )
+        )
+
+    }
 }

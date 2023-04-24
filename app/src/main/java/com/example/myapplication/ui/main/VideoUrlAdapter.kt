@@ -16,11 +16,11 @@ import com.example.myapplication.R
 import com.example.myapplication.databinding.ItemVideoBinding
 
 @UnstableApi
-class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>, val context: Context?) :
+class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>, val context: Context?,val isOfflineVideo:Boolean = false) :
     RecyclerView.Adapter<VideoUrlAdapter.VideoListViewHolder>() {
     lateinit var videoBinding: ItemVideoBinding
     interface ItemClick {
-        fun onItemClick(id: Int)
+        fun onItemClick(id: Int,isOfflineVideo: Boolean)
         fun onDownloadClick(id: Int)
         fun removeDownload(id:Int)
 
@@ -35,12 +35,15 @@ class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>, val context:
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoListViewHolder {
          videoBinding = ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return VideoListViewHolder(videoBinding, itemClickListner)
+        return VideoListViewHolder(videoBinding, itemClickListner,isOfflineVideo)
     }
 
     override fun onBindViewHolder(holder: VideoListViewHolder, position: Int) {
         holder.view.video.text = videoUrlList[position].title
         holder.onBind(videoUrlList[position])
+        if(isOfflineVideo){
+            holder.view.downloadButton.visibility = View.GONE
+        }
 
         if (context != null) {
             Glide.with(context)
@@ -55,11 +58,11 @@ class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>, val context:
 
 
     @UnstableApi
-    class VideoListViewHolder(val view: ItemVideoBinding, val itemClickListner: ItemClick) :
+    class VideoListViewHolder(val view: ItemVideoBinding, val itemClickListner: ItemClick, val isOfflineVideo: Boolean) :
         RecyclerView.ViewHolder(view.root) {
         fun onBind(item: MediaItemDto) {
-            view.video.setOnClickListener {
-                itemClickListner.onItemClick(item.id)
+            view.root.setOnClickListener {
+                itemClickListner.onItemClick(item.id,isOfflineVideo)
             }
             view.downloadButton.setOnClickListener {
                 itemClickListner.onDownloadClick(item.id)

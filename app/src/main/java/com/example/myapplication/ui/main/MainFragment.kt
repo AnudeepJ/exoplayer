@@ -1,19 +1,14 @@
 package com.example.myapplication.ui.main
 
-import android.graphics.Color
 import android.net.Uri
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
@@ -24,13 +19,12 @@ import com.example.myapplication.DemoDownloadService
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentMainBinding
-import com.example.myapplication.databinding.ItemVideoBinding
 
 const val TAG = "Exoplayer"
 
 @UnstableApi
 class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
-
+    var isOfflineVideo = false
     companion object {
         fun newInstance() = MainFragment()
     }
@@ -40,6 +34,8 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("PRS","argument"+arguments?.getBoolean("IS_OFFLINE"))
+        isOfflineVideo = arguments?.getBoolean("IS_OFFLINE") ?: false
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         // TODO: Use the ViewModel
     }
@@ -78,21 +74,34 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
 
     private fun initRecyclerView() {
         binding.videoUrl.layoutManager = LinearLayoutManager(requireContext())
-        val videoAdapter = VideoUrlAdapter(viewModel.urlList, context)
-        videoAdapter.setListner(this)
-        binding.videoUrl.adapter = videoAdapter
-    }
-
-    override fun onItemClick(id: Int) {
-        Log.d("PRS", "Main fragment")
-        if (activity is MainActivity) {
-            val download =
-                JSMDownloadManager.getDownloadManager(requireContext()).downloadIndex.getDownload(id.toString())
-            Log.d(TAG, "onItemClick: ${download?.state}")
-            val url = viewModel.getUrlForID(id)
-            (activity as MainActivity).replaceFragment(url, download?.state ?: 0)
+        if(isOfflineVideo){
+            val videoAdapter = VideoUrlAdapter(viewModel.offlineList, context,isOfflineVideo)
+            videoAdapter.setListner(this)
+            binding.videoUrl.adapter = videoAdapter
+        }else{
+            val videoAdapter = VideoUrlAdapter(viewModel.urlList, context,isOfflineVideo)
+            videoAdapter.setListner(this)
+            binding.videoUrl.adapter = videoAdapter
         }
 
+    }
+
+    override fun onItemClick(id: Int, isOfflineVideo: Boolean) {
+        Log.d("PRS", "Main fragment")
+        if(isOfflineVideo){
+            val url = viewModel.getOfflineUrlForID(id)
+            (activity as MainActivity).replaceFragment(url, 0)
+        }else {
+            if (activity is MainActivity) {
+                val download =
+                    JSMDownloadManager.getDownloadManager(requireContext()).downloadIndex.getDownload(
+                        id.toString()
+                    )
+                Log.d(TAG, "onItemClick: ${download?.state}")
+                val url = viewModel.getUrlForID(id)
+                (activity as MainActivity).replaceFragment(url, download?.state ?: 0)
+            }
+        }
     }
 
     override fun onDownloadClick(id: Int) {
@@ -123,5 +132,22 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
         popup.show()
     }
 
+    fun pauseDownloads(){
+        Log.d(TAG, "pauseDownloads: ")
+        DownloadService.sendPauseDownloads(
+            requireContext(),
+            DemoDownloadService::class.java,  /* foreground= */
+            false
+        )
+    }
+
+    fun resumeDownloads(){
+        Log.d(TAG, "resumeDownloads: ")
+        DownloadService.sendResumeDownloads(
+            requireContext(),
+            DemoDownloadService::class.java,  /* foreground= */
+            false
+        )
+    }
 
 }
