@@ -5,7 +5,7 @@ object DataGenerator {
         add(
             MediaItemDto(
                 1,
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/big_buck_bunny_720p_1mb.mp4",
                 "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
                 title = "Big Buck Bunny"
             )
@@ -13,7 +13,7 @@ object DataGenerator {
         add(
             MediaItemDto(
                 2,
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/file_example_MP4_1920_18MG.mp4",
                 "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
                 title = "Elephant Dream"
             )
@@ -21,7 +21,7 @@ object DataGenerator {
         add(
             MediaItemDto(
                 3,
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/file_example_MP4_1280_10MG.mp4",
                 "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
                 title = "For Bigger Blazes"
             )
