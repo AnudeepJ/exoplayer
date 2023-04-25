@@ -16,15 +16,20 @@ import com.example.myapplication.R
 import com.example.myapplication.databinding.ItemVideoBinding
 
 @UnstableApi
-class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>, val context: Context?,val isOfflineVideo:Boolean = false) :
+class VideoUrlAdapter(
+    private val videoUrlList: List<MediaItemDto>,
+    val context: Context?,
+    val isOfflineVideo: Boolean = false
+) :
     RecyclerView.Adapter<VideoUrlAdapter.VideoListViewHolder>() {
     lateinit var videoBinding: ItemVideoBinding
-    interface ItemClick {
-        fun onItemClick(id: Int,isOfflineVideo: Boolean)
-        fun onDownloadClick(id: Int)
-        fun removeDownload(id:Int)
 
-        fun onMenuClick(view:View,position:Int,id:Int)
+    interface ItemClick {
+        fun onItemClick(id: Int, isOfflineVideo: Boolean)
+        fun onDownloadClick(id: Int)
+        fun removeDownload(id: Int)
+
+        fun onMenuClick(view: View, position: Int, id: Int)
     }
 
     lateinit var itemClickListner: ItemClick
@@ -34,14 +39,14 @@ class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>, val context:
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoListViewHolder {
-         videoBinding = ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return VideoListViewHolder(videoBinding, itemClickListner,isOfflineVideo)
+        videoBinding = ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return VideoListViewHolder(videoBinding, itemClickListner, isOfflineVideo)
     }
 
     override fun onBindViewHolder(holder: VideoListViewHolder, position: Int) {
         holder.view.video.text = videoUrlList[position].title
         holder.onBind(videoUrlList[position])
-        if(isOfflineVideo){
+        if (isOfflineVideo) {
             holder.view.downloadButton.visibility = View.GONE
         }
 
@@ -58,45 +63,49 @@ class VideoUrlAdapter(private val videoUrlList: List<MediaItemDto>, val context:
 
 
     @UnstableApi
-    class VideoListViewHolder(val view: ItemVideoBinding, val itemClickListner: ItemClick, val isOfflineVideo: Boolean) :
+    class VideoListViewHolder(
+        val view: ItemVideoBinding,
+        val itemClickListner: ItemClick,
+        val isOfflineVideo: Boolean
+    ) :
         RecyclerView.ViewHolder(view.root) {
         fun onBind(item: MediaItemDto) {
             view.root.setOnClickListener {
-                itemClickListner.onItemClick(item.id,isOfflineVideo)
+                itemClickListner.onItemClick(item.id, isOfflineVideo)
             }
             view.downloadButton.setOnClickListener {
                 itemClickListner.onDownloadClick(item.id)
             }
             view.itemDownloadedButton.setOnClickListener {
-                itemClickListner.onMenuClick(it,item.id-1,item.id)
+                itemClickListner.onMenuClick(it, item.id - 1, item.id)
             }
             when (item.state) {
                 STATE_COMPLETED -> {
                     view.state.text = "DOWNLOAD_COMPLETED"
                     view.itemDownloadedButton.visibility = View.VISIBLE
-                    view.progressbarDownload.visibility =View.GONE
+                    view.progressbarDownload.visibility = View.GONE
                     view.itemDownloadingButton.visibility = View.GONE
                     view.itemDownloadButton.visibility = View.GONE
                 }
                 STATE_DOWNLOADING -> {
                     view.state.text = "DOWNLOAD_DOWNLOADING"
-                    view.progressbarDownload.visibility =View.VISIBLE
+                    view.progressbarDownload.visibility = View.VISIBLE
                     view.itemDownloadingButton.visibility = View.VISIBLE
                     view.itemDownloadedButton.visibility = View.GONE
                     view.itemDownloadButton.visibility = View.GONE
                 }
                 STATE_QUEUED -> {
                     view.state.text = "DOWNLOAD_QUEUED"
-                    view.itemDownloadButton.visibility = View.VISIBLE
-                    view.progressbarDownload.visibility =View.GONE
+                    view.itemDownloadButton.visibility = View.GONE
+                    view.progressbarDownload.visibility = View.VISIBLE
                     view.itemDownloadingButton.visibility = View.GONE
                     view.itemDownloadedButton.visibility = View.GONE
 
                 }
-                STATE_REMOVING ->{
+                STATE_REMOVING -> {
                     view.state.text = "DOWNLOAD_REMOVED"
                     view.itemDownloadButton.visibility = View.GONE
-                    view.progressbarDownload.visibility =View.GONE
+                    view.progressbarDownload.visibility = View.GONE
                     view.itemDownloadingButton.visibility = View.GONE
                     view.itemDownloadedButton.visibility = View.GONE
                 }

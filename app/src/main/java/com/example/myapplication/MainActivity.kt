@@ -1,5 +1,8 @@
 package com.example.myapplication
 
+import android.app.PictureInPictureParams
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -34,6 +37,7 @@ class MainActivity : AppCompatActivity() {
             fragment.arguments = data
         }
         startDownloadService()
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
 
@@ -50,7 +54,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-         if (supportFragmentManager.backStackEntryCount > 1) supportFragmentManager.popBackStack() else super.onBackPressed()
+        if (supportFragmentManager.backStackEntryCount > 1) supportFragmentManager.popBackStack() else super.onBackPressed()
     }
 
     private fun startDownloadService() {
@@ -75,19 +79,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val item = item.itemId
-        val fragment = supportFragmentManager.findFragmentById(R.id.container) as MainFragment
+        val fragment = supportFragmentManager.findFragmentById(R.id.container)
         when (item) {
             R.id.pause -> {
-                fragment.pauseDownloads()
+                if (fragment is MainFragment)
+                    fragment.pauseDownloads()
                 return true
             }
             R.id.resume -> {
-                fragment.resumeDownloads()
+                if (fragment is MainFragment)
+                    fragment.resumeDownloads()
                 return true
             }
-            else ->{
-              return false
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+            else -> {
+                return false
             }
         }
     }
+
 }

@@ -1,36 +1,39 @@
 package com.example.myapplication.ui.main
 
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
-import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSink
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import com.example.myapplication.R
 import com.example.myapplication.databinding.VideoDetailBinding
-import java.io.File
+
 
 @UnstableApi
 class VideoDetailFragment : Fragment() {
     var url = ""
     private var state: Int = 0
     var permission = arrayOf("android.permission.READ_EXTERNAL_STORAGE")
-    private var player: ExoPlayer? = null
+     var player: ExoPlayer? = null
 
     private var playWhenReady = true
     private var currentItem = 0
@@ -62,6 +65,55 @@ class VideoDetailFragment : Fragment() {
         url = arguments?.getString("URL", "") ?: ""
         state = arguments?.getInt(BundleConstants.VIDEO_DOWNLOAD) ?: 0
         Log.d("PRS", "url " + url)
+        binding.videoDetail.setShowNextButton(false)
+        binding.videoDetail.setShowPreviousButton(false)
+        binding.videoDetail.setShowSubtitleButton(false)
+        binding.videoDetail.setFullscreenButtonClickListener {
+            if (it) {
+                val layoutParams = binding.videoDetail.layoutParams
+                layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                binding.videoDetail.layoutParams = layoutParams
+                player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
+                (activity as AppCompatActivity).supportActionBar?.hide()
+
+            } else {
+                val layoutParams = binding.videoDetail.layoutParams
+                val dimensionInDp = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    200f,
+                    resources.displayMetrics
+                ).toInt()
+                (activity as AppCompatActivity).supportActionBar?.show()
+
+                layoutParams.height = dimensionInDp
+                binding.videoDetail.layoutParams = layoutParams
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+
+            }
+            Log.d("FULL_SCREEN", it.toString())
+
+        }
+        if (activity?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val layoutParams = binding.videoDetail.layoutParams
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+            binding.videoDetail.layoutParams = layoutParams
+            player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+            Log.d("FULL_SCREEN", "${binding.videoDetail.resizeMode}  resizemode")
+        } else {
+            val layoutParams = binding.videoDetail.layoutParams
+            val dimensionInDp = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                200f,
+                resources.displayMetrics
+            ).toInt()
+
+            layoutParams.height = dimensionInDp
+            binding.videoDetail.layoutParams = layoutParams
+        }
+
         initializePlayerFromURI2()
     }
 

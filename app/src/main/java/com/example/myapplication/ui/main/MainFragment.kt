@@ -34,7 +34,7 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("PRS","argument"+arguments?.getBoolean("IS_OFFLINE"))
+        Log.d("PRS", "argument" + arguments?.getBoolean("IS_OFFLINE"))
         isOfflineVideo = arguments?.getBoolean("IS_OFFLINE") ?: false
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         // TODO: Use the ViewModel
@@ -71,15 +71,14 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
     }
 
 
-
     private fun initRecyclerView() {
         binding.videoUrl.layoutManager = LinearLayoutManager(requireContext())
-        if(isOfflineVideo){
-            val videoAdapter = VideoUrlAdapter(viewModel.offlineList, context,isOfflineVideo)
+        if (isOfflineVideo) {
+            val videoAdapter = VideoUrlAdapter(viewModel.offlineList, context, isOfflineVideo)
             videoAdapter.setListner(this)
             binding.videoUrl.adapter = videoAdapter
-        }else{
-            val videoAdapter = VideoUrlAdapter(viewModel.urlList, context,isOfflineVideo)
+        } else {
+            val videoAdapter = VideoUrlAdapter(viewModel.urlList, context, isOfflineVideo)
             videoAdapter.setListner(this)
             binding.videoUrl.adapter = videoAdapter
         }
@@ -88,10 +87,10 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
 
     override fun onItemClick(id: Int, isOfflineVideo: Boolean) {
         Log.d("PRS", "Main fragment")
-        if(isOfflineVideo){
+        if (isOfflineVideo) {
             val url = viewModel.getOfflineUrlForID(id)
             (activity as MainActivity).replaceFragment(url, 0)
-        }else {
+        } else {
             if (activity is MainActivity) {
                 val download =
                     JSMDownloadManager.getDownloadManager(requireContext()).downloadIndex.getDownload(
@@ -121,7 +120,7 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
     }
 
     override fun onMenuClick(view: View, position: Int, id: Int) {
-        val popup = PopupMenu(view.context,view)
+        val popup = PopupMenu(view.context, view)
         popup.inflate(R.menu.menu)
         popup.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -132,7 +131,7 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
         popup.show()
     }
 
-    fun pauseDownloads(){
+    fun pauseDownloads() {
         Log.d(TAG, "pauseDownloads: ")
         DownloadService.sendPauseDownloads(
             requireContext(),
@@ -141,7 +140,7 @@ class MainFragment : Fragment(), VideoUrlAdapter.ItemClick {
         )
     }
 
-    fun resumeDownloads(){
+    fun resumeDownloads() {
         Log.d(TAG, "resumeDownloads: ")
         DownloadService.sendResumeDownloads(
             requireContext(),
