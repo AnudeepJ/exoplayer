@@ -53,6 +53,7 @@ class VideoUrlAdapter(
         if (context != null) {
             Glide.with(context)
                 .load(videoUrlList[position].imageUrl)
+                .centerCrop()
                 .into(holder.view.videoThumbnail)
         }
     }

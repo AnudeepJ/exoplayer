@@ -1,17 +1,25 @@
 package com.example.myapplication
 
+import android.app.AppOpsManager
 import android.app.PictureInPictureParams
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.DownloadService
 import com.example.myapplication.databinding.ActivityMainBinding
+import com.example.myapplication.ui.main.BundleConstants.IS_VIDEO_OFFLINE
 import com.example.myapplication.ui.main.BundleConstants.VIDEO_DOWNLOAD
 import com.example.myapplication.ui.main.MainFragment
 import com.example.myapplication.ui.main.VideoDetailFragment
@@ -45,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         val bundle = Bundle()
         bundle.putString("URL", url)
         bundle.putInt(VIDEO_DOWNLOAD, state)
+        bundle.putBoolean(IS_VIDEO_OFFLINE, isOfflineVideo)
         val fragment = VideoDetailFragment()
         fragment.arguments = bundle
         supportFragmentManager.beginTransaction()
@@ -99,6 +108,75 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        supportActionBar?.hide()
+        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val status = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
+                android.os.Process.myUid(),
+                packageName
+            ) ==
+                    AppOpsManager.MODE_ALLOWED
+        } else {
+            false
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (status) {
+                enterPIPMode()
+            } else {
+                val intent = Intent(
+                    "android.settings.PICTURE_IN_PICTURE_SETTINGS",
+                    Uri.parse("package:$packageName")
+                )
+                startActivity(intent)
+            }
+        } else {
+            Toast.makeText(this, "Feature Not Supported!!", Toast.LENGTH_SHORT).show()
+
+        }
+
+    }
+
+    //For N devices that support it, not "officially"
+    @Suppress("DEPRECATION")
+    fun enterPIPMode() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.container)
+        if (fragment is VideoDetailFragment)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                && packageManager
+                    .hasSystemFeature(
+                        PackageManager.FEATURE_PICTURE_IN_PICTURE
+                    )
+            ) {
+                fragment.binding.videoDetail.useController = false
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val params = PictureInPictureParams.Builder()
+                    this.enterPictureInPictureMode(params.build())
+                } else {
+                    this.enterPictureInPictureMode()
+                }
+            }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        val fragment = supportFragmentManager.findFragmentById(R.id.container)
+        if (fragment is VideoDetailFragment) {
+            fragment.binding.videoDetail.useController = !isInPictureInPictureMode
+            if (isInPictureInPictureMode)
+                supportActionBar?.hide()
+            else
+                supportActionBar?.show()
+        }
+
     }
 
 }

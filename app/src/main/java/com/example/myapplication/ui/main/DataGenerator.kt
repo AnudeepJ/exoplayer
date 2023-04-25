@@ -13,9 +13,9 @@ object DataGenerator {
         add(
             MediaItemDto(
                 2,
-                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/file_example_MP4_1920_18MG.mp4",
-                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
-                title = "Elephant Dream"
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/sample_large_3.mp4",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/ocean_surfing_three.png",
+                title = "Surfing Large Video"
             )
         )
         add(
@@ -83,6 +83,14 @@ object DataGenerator {
                 title = "Tears of Steel"
             )
         )
+        add(
+            MediaItemDto(
+                11,
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/file_example_MP3_5MG.mp3",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/mp3.jpeg",
+                title = "Mp3 file only"
+            )
+        )
     }
 
 
@@ -91,32 +99,32 @@ object DataGenerator {
             MediaItemDto(
                 1,
                 "android.resource://com.example.myapplication/raw/sample1",
-                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-                title = "Big Buck Bunny"
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/nature_with_cars_one.png",
+                title = "Forest With Cars"
             )
         )
         add(
             MediaItemDto(
                 2,
-                "android.resource://com.example.myapplication/raw/sample1",
-                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
-                title = "Elephant Dream"
+                "android.resource://com.example.myapplication/raw/sampe_video_two",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/earth_two.png",
+                title = "Nature Earth"
             )
         )
         add(
             MediaItemDto(
                 3,
-                "android.resource://com.example.myapplication/raw/sample1",
-                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
-                title = "For Bigger Blazes"
+                "android.resource://com.example.myapplication/raw/sample_large_3",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/ocean_surfing_three.png",
+                title = "Ocean Surfing Large"
             )
         )
         add(
             MediaItemDto(
                 4,
-                "android.resource://com.example.myapplication/raw/sample1",
-                "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg",
-                title = "Sintel"
+                "android.resource://com.example.myapplication/raw/sample_four",
+                "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/ax8o1gwvyizc/b/bucket-exoplayer-demo/o/grapes_screen_shot_four.png",
+                title = "Beautiful Grapes"
             )
         )
 

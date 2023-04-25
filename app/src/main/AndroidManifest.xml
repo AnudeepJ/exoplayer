@@ -28,8 +28,11 @@
         </activity>
 
         <activity
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:launchMode="singleTask"
             android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="uiMode|orientation|keyboardHidden|screenSize|smallestScreenSize|screenLayout"
             android:exported="true">
 
         </activity>
